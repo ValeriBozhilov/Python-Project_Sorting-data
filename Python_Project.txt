@@ -1,0 +1,130 @@
+#Step one of sorting data  
+import openpyxl
+import os
+import glob
+
+# Set the folder path containing Excel files
+folder_path = 'C:\\Users\\ASUS\\Desktop\\All_Excel_Files\\Качвания 2023\\2023'
+# Set the new folder path for saving updated Excel files
+new_folder_path = 'C:\\Users\\ASUS\\Desktop\\All_Excel_Files\\Качвания 2023\\Test'
+
+# Create the new folder if it doesn't exist
+os.makedirs(new_folder_path, exist_ok=True)
+
+# List all Excel files in the folder
+excel_files = glob.glob(os.path.join(folder_path, '*.xlsx'))
+
+# Process each Excel file
+for file in excel_files:
+    # Load the Excel file
+    wb = openpyxl.load_workbook(file)
+    sheet = wb.active
+
+    # Find the next free row in column A
+    next_free_row = sheet.max_row + 1
+    while sheet.cell(row=next_free_row, column=1).value is None and next_free_row > 1:
+        next_free_row -= 1
+    next_free_row += 1
+
+    # Move data from columns I to P to columns A to H after the next free row
+    for row in range(1, sheet.max_row + 1):
+        for col in range(9, 17):
+            cell_value = sheet.cell(row=row, column=col).value
+            if cell_value is not None:
+                new_row = row + next_free_row - 1
+                for new_col in range(1, 9):
+                    # Check if the cell is part of a merged cell range
+                    merged_range = None
+                    for range_str in sheet.merged_cells.ranges:
+                        if sheet.cell(row=new_row, column=new_col).coordinate in range_str:
+                            merged_range = range_str
+                            break
+
+                    # If it's a merged cell, unmerge the range
+                    if merged_range is not None:
+                        sheet.unmerge_cells(str(merged_range))
+
+                    sheet.cell(row=new_row, column=new_col).value = sheet.cell(row=row, column=new_col + 8).value
+
+                    # Merge the cells back if necessary
+                    if merged_range is not None:
+                        sheet.merge_cells(str(merged_range))
+
+                # Clear the data in columns I to P
+                for clear_col in range(9, 17):
+                    # Check if the cell is part of a merged cell range
+                    merged_range = None
+                    for range_str in sheet.merged_cells.ranges:
+                        if sheet.cell(row=row, column=clear_col).coordinate in range_str:
+                            merged_range = range_str
+                            break
+
+                    # If it's a merged cell, unmerge the range
+                    if merged_range is not None:
+                        sheet.unmerge_cells(str(merged_range))
+
+                    sheet.cell(row=row, column=clear_col).value = None
+
+                    # Merge the cells back if necessary
+                    if merged_range is not None:
+                        sheet.merge_cells(str(merged_range))
+
+    # Save the updated Excel file in the new folder path
+    updated_file_name = os.path.splitext(os.path.basename(file))[0] + '_updated.xlsx'
+    updated_file_path = os.path.join(new_folder_path, updated_file_name)
+    wb.save(updated_file_path)
+	
+	
+#Step two
+
+import os
+import pandas as pd
+
+folder_path = 'C:\\Users\\ASUS\\Desktop\\All_Excel_Files\\Качвания 2023\\Test'
+extension = '.xlsx'
+
+# Loop through all files in the folder
+for file_name in os.listdir(folder_path):
+    # Check if the file has the correct extension
+    if file_name.endswith(extension):
+        # Get the file path
+        file_path = os.path.join(folder_path, file_name)
+
+        # Read the Excel file
+        df = pd.read_excel(file_path, engine='openpyxl')
+
+        # Add a new column with the file name (without extension)
+        base_name = os.path.splitext(file_name)[0]
+        df['I'] = base_name
+
+        # Save the modified Excel file
+        df.to_excel(file_path, index=False, engine='openpyxl')
+
+print('All files have been updated with the new column.')
+
+
+#Step three
+
+import pandas as pd
+import os
+
+folder_path = 'C:\\Users\\ASUS\\Desktop\\All_Excel_Files\\Качвания 2018\\Test1'
+output_file = 'C:\\Users\\ASUS\\Desktop\\All_Excel_Files\\Update 2018.xlsx'
+
+# Get all Excel files in the folder
+excel_files = [f for f in os.listdir(folder_path) if f.endswith('.xlsx') or f.endswith('.xls')]
+
+# Create a new Excel file to store the combined data
+writer = pd.ExcelWriter(output_file, engine='openpyxl')
+
+# Iterate through each Excel file
+for excel_file in excel_files:
+    # Load the file into a DataFrame
+    df = pd.read_excel(os.path.join(folder_path, excel_file))
+
+    # Write the DataFrame to the output file with the sheet named after the original file (without extension)
+    sheet_name = os.path.splitext(excel_file)[0][:31]
+    df.to_excel(writer, sheet_name=sheet_name, index=False)
+
+# Save and close the output file
+writer.book.save(output_file)
