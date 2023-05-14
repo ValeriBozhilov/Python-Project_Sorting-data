@@ -1,0 +1,76 @@
+import os
+import openpyxl
+from openpyxl.utils import get_column_letter
+
+# Define the folder path containing the Excel files
+folder_path = 'C:\\Users\\ASUS ROG G750\\Desktop\\All_Excel_Files\\Качвания 2023\\2023'
+
+# Create a new workbook to store the combined data
+combined_wb = openpyxl.Workbook()
+combined_sheet = combined_wb.active
+combined_sheet.title = "Combined Data"
+combined_row = 1
+
+# Iterate through all the Excel files in the folder
+for filename in os.listdir(folder_path):
+    if filename.endswith('.xlsx'):
+        # Load the Excel file
+        filepath = os.path.join(folder_path, filename)
+        wb = openpyxl.load_workbook(filepath)
+        sheet = wb.active
+
+        # Unmerge cells
+        merged_ranges = sheet.merged_cells.ranges[:]
+        for merged_cell_range in merged_ranges:
+            sheet.unmerge_cells(str(merged_cell_range))
+
+        # Find all data between columns J to P and move to columns B to G after row 70
+        for row in range(1, sheet.max_row + 1):
+            for col in range(9, 18):
+                cell_value = sheet.cell(row=row, column=col).value
+                if cell_value is not None:
+                    new_row = row + 70  # Move to row 71 (after row 70)
+                    for new_col in range(1, 8):  # Start from column B instead of A
+                        sheet.cell(row=new_row, column=new_col).value = sheet.cell(row=row, column=new_col + 8).value
+                    # Clear the data in columns J to P
+                    for clear_col in range(9, 16):
+                        sheet.cell(row=row, column=clear_col).value = None
+
+        # Delete all empty rows
+        for row in range(sheet.max_row, 0, -1):
+            empty = True
+            for col in range(1, sheet.max_column + 1):
+                if sheet.cell(row=row, column=col).value is not None:
+                    empty = False
+                    break
+            if empty:
+                sheet.delete_rows(row)
+
+        # Add the filename to column H for each row with data in column G and copy the data to the combined sheet
+        for row in range(1, sheet.max_row + 1):
+            if sheet.cell(row=row, column=7).value is not None:
+                sheet.cell(row=row, column=8).value = filename
+
+                # Copy the row data to the combined sheet
+                for col in range(1, sheet.max_column + 1):
+                    cell_value = sheet.cell(row=row, column=col).value
+                    combined_sheet.cell(row=combined_row, column=col).value = cell_value
+                combined_row += 1
+
+# Save the combined Excel file
+combined_wb.save(os.path.join(folder_path, 'combined_data.xlsx'))
+
+
+import pandas as pd
+#
+# Прочети файла Excel
+file_path = "C:\\Users\\ASUS ROG G750\\Desktop\\All_Excel_Files\\Качвания 2023\\2023\\combined_data.xlsx"
+df = pd.read_excel(file_path)
+
+
+# Копирай стойностите от колона C (индекс 2) в колона J (индекс 9) за редове с празни стойности в колона B (индекс 1)
+df.loc[df.iloc[:, 1].isnull(), df.columns[9]] = df.loc[df.iloc[:, 1].isnull(), df.columns[2]]
+
+# Запиши актуализирания DataFrame в нов файл Excel
+output_file_path = "C:\\Users\\ASUS ROG G750\\Desktop\\All_Excel_Files\\Качвания 2023\\2023\\combined_data_updated.xlsx"
+df.to_excel(output_file_path, index=False, engine='openpyxl')
