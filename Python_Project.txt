@@ -4,9 +4,9 @@ import os
 import glob
 
 # Set the folder path containing Excel files
-folder_path = 'C:\\Users\\ASUS\\Desktop\\All_Excel_Files\\Качвания 2023\\2023'
+folder_path = 'C:\\Users\\ASUS\\Desktop\\All_Excel_Files\\File 2023\\2023'
 # Set the new folder path for saving updated Excel files
-new_folder_path = 'C:\\Users\\ASUS\\Desktop\\All_Excel_Files\\Качвания 2023\\Test'
+new_folder_path = 'C:\\Users\\ASUS\\Desktop\\All_Excel_Files\\File 2023\\Test'
 
 # Create the new folder if it doesn't exist
 os.makedirs(new_folder_path, exist_ok=True)
@@ -80,7 +80,7 @@ for file in excel_files:
 import os
 import pandas as pd
 
-folder_path = 'C:\\Users\\ASUS\\Desktop\\All_Excel_Files\\Качвания 2023\\Test'
+folder_path = 'C:\\Users\\ASUS\\Desktop\\All_Excel_Files\\File 2023\\Test'
 extension = '.xlsx'
 
 # Loop through all files in the folder
@@ -108,7 +108,7 @@ print('All files have been updated with the new column.')
 import pandas as pd
 import os
 
-folder_path = 'C:\\Users\\ASUS\\Desktop\\All_Excel_Files\\Качвания 2018\\Test1'
+folder_path = 'C:\\Users\\ASUS\\Desktop\\All_Excel_Files\\File 2018\\Test1'
 output_file = 'C:\\Users\\ASUS\\Desktop\\All_Excel_Files\\Update 2018.xlsx'
 
 # Get all Excel files in the folder
